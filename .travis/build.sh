@@ -1,6 +1,15 @@
 #!/bin/bash
 set -x
 
+function logical_cpu_count() {
+  if [[ $(uname) == 'Darwin' ]]; then
+    local cpu_count=$(sysctl -n hw.ncpu)
+  else
+    local cpu_count=$(nproc)
+  fi
+  echo ${cpu_count}
+}
+
 if [ "$TRAVIS_OS_NAME" = "linux" ]; then
   sudo update-alternatives \
     --install /usr/bin/gcc gcc /usr/bin/gcc-5 90 \
@@ -22,22 +31,17 @@ mkdir build
 cd build
 conan install ./.. --build=missing
 
-NPROC=`sysctl -n hw.ncpu`
-if [ "$NPROC" == "" ] ; then
-  NPROC=`nproc`
-fi
-
 if [ ! -z "$flags" ]; then extra_flags="-D stlab_appended_flags=$flags"; fi
     
 cmake -D CMAKE_BUILD_TYPE=$build_type $options $extra_flags ..
 if [ $? -ne 0 ]; then exit 1; fi
 
-make VERBOSE=1 -j$NPROC
+make VERBOSE=1 -j$(logical_cpu_count)
 if [ $? -ne 0 ]; then exit 1; fi
 
 if $coverage; then lcov -c -i -b .. -d . -o Coverage.baseline; fi
 
-ctest --output-on-failure -j$NPROC
+ctest --output-on-failure -j$(logical_cpu_count)
 if [ $? -ne 0 ]; then exit 1; fi
 
 if $coverage; then
