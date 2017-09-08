@@ -25,9 +25,6 @@ compiler:
 
 os:
   - linux
-  - osx
-  
-osx_image: xcode8
 
 env:
   - build_type=debug options="-D stlab_testing=ON"
