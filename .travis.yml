@@ -32,7 +32,8 @@ branches:
   except: /pr\/.*/
   
 before_install:
-  - pip install conan
+  - export PATH=$HOME/.local.bin:$PATH
+  - pip install --user $(whoami) conan
   
 script:
   - .travis/build.sh
