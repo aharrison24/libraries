@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 
 function logical_cpu_count() {
   if [[ $(uname) == 'Darwin' ]]; then
